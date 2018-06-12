@@ -1,49 +1,82 @@
-const {
-  MultipleThings,
-  Property,
-  Thing,
-  Value,
-  WebThingServer,
-} = require('webthing');
-const uuidv4 = require('uuid/v4');
+var index  = require('webthing');
+var Property = index.Property;
+var MultipleThings = index.server.MultipleThings;
+var Thing = index.Thing;
+var Value = index.Value;
+var WebThingServer = index.server.WebThingServer;
 
 /**
  * A dimmable light that logs received commands to stdout.
  */
-class ExampleDimmableLight extends Thing {
-  constructor() {
-    super('My Lamp', 'dimmableLight', 'A web connected lamp');
+function ExampleDimmableLight() {
+{
+    Thing.call(this, 'My Lamp', dimmableLight, 'A web connected lamp');
+
+    this.addProperty(
+      new Property(
+        this,
+        'on',
+        new Value(true, (v) => console.log('On-State is now', v)),
+        {
+          '@type': 'OnOffProperty',
+          label: 'On/Off',
+          type: 'boolean',
+          description: 'Whether the lamp is turned on',
+        }));
+
+    this.addProperty(
+      new Property(
+        this,
+        'brightness',
+        new Value(50, (v) => console.log('Brightness is now', v)),
+        {
+          '@type': 'BrightnessProperty',
+          label: 'Brightness',
+          type: 'number',
+          description: 'The level of light from 0-100',
+          minimum: 0,
+          maximum: 100,
+          unit: 'percent',
+        }));
+
     this.addProperty(this.getOnProperty());
     this.addProperty(this.getLevelProperty());
   }
 
-  getOnProperty() {
+  this.getOnProperty = function() {
     return new Property(
       this,
       'on',
-      new Value(true, (v) => console.log('On-State is now', v)),
+      new Value(true, function(v) { console.log('On-State is now', v);}),
       {type: 'boolean',
        description: 'Whether the lamp is turned on'});
   }
 
-  getLevelProperty() {
+  this.getLevelProperty = function() {
     return new Property(
       this,
       'level',
-      new Value(50, (l) => console.log('New light level is', l)),
+      new Value(50, function(l) { console.log('New light level is', l);}),
       {type: 'number',
        description: 'The level of light from 0-100',
        minimum: 0,
        maximum: 100});
   }
+
+  this.addProperty(this.getOnProperty());
+  this.addProperty(this.getLevelProperty());
+  
+  return this;
 }
+
 
 /**
  * A humidity sensor which updates its measurement every few seconds.
  */
-class FakeGpioHumiditySensor extends Thing {
-  constructor() {
-    super('My Humidity Sensor',
+function FakeGpioHumiditySensor() {
+  {
+    var self = this;
+    Thing.call(this, 'My Humidity Sensor',
           'multiLevelSensor',
           'A web connected humidity sensor');
 
@@ -64,34 +97,36 @@ class FakeGpioHumiditySensor extends Thing {
                     unit: '%'}));
 
     // Poll the sensor reading every 3 seconds
-    setInterval(() => {
+    setInterval(function() {
       // Update the underlying value, which in turn notifies all listeners
-      this.level.notifyOfExternalUpdate(this.readFromGPIO());
+      var newLevel = self.readFromGPIO();
+      console.log('setting new humidity level:', newLevel);
+      self.level.notifyOfExternalUpdate(newLevel);
     }, 3000);
   }
 
   /**
    * Mimic an actual sensor updating its reading every couple seconds.
    */
-  readFromGPIO() {
+  this.readFromGPIO = function() {
     return 70.0 * Math.random() * (-0.5 + Math.random());
   }
 }
 
 function runServer() {
   // Create a thing that represents a dimmable light
-  const light = new ExampleDimmableLight();
+  var light = new ExampleDimmableLight();
 
   // Create a thing that represents a humidity sensor
-  const sensor = new FakeGpioHumiditySensor();
+  var sensor = new FakeGpioHumiditySensor();
 
   // If adding more than one thing, use MultipleThings() with a name.
   // In the single thing case, the thing's name will be broadcast.
-  const server = new WebThingServer(new MultipleThings([light, sensor],
+  var server = new WebThingServer(new MultipleThings([light, sensor],
                                                        'LightAndTempDevice'),
                                     8888);
 
-  process.on('SIGINT', () => {
+  process.on('SIGINT', function() {
     server.stop();
     process.exit();
   });

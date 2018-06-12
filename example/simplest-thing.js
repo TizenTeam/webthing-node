@@ -8,42 +8,45 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.*
  */
-const {
-  Property,
-  SingleThing,
-  Thing,
-  Value,
-  WebThingServer,
-} = require('webthing');
+var index  = require('webthing');
+var Property = index.Property;
+var SingleThing = index.server.SingleThing;
+var Thing = index.Thing;
+var Value = index.Value;
+var WebThingServer = index.server.WebThingServer;
 
 function makeThing() {
-  const thing = new Thing('ActuatorExample',
-                          'onOffSwitch',
-                          'An actuator example that just log');
+  var thing = new Thing('ActuatorExample', 
+                        'onOffSwitch',
+                        'An actuator example that just log');
 
   thing.addProperty(
     new Property(thing,
-                 'on',
-                 new Value(true, (update) => console.log(`change: ${update}`)),
-                 {type: 'boolean',
-                  description: 'Whether the output is changed'}));
+                 'on', 
+                 new Value(true, function(update) {
+                   console.log("change: " + update);
+                 }),
+                 {
+                   '@type': 'OnOffProperty',
+                   label: 'On/Off',
+                   type: 'boolean',
+                   description: 'Whether the output is changed'
+                 }));
   return thing;
 }
 
 function runServer() {
-  const port = process.argv[2] ? Number(process.argv[2]) : 8888;
-  const url = `http://localhost:${port}/properties/on`;
+  var port = process.argv[2] ? Number(process.argv[2]) : 8888;
+  var url = 'http://localhost:' + port + '/properties/on';
 
-  console.log(`Usage:\n
-${process.argv[0]} ${process.argv[1]} [port]
+  console.log('Usage:\n'
+              + process.argv[0] + ' ' + process.argv[1] + ' [port]\n\n'
+              + 'Try:\ncurl -X PUT -H "Content-Type: application/json" --data \'{"on": true }\' '
+              + url + '\n');
 
-Try:
-curl -X PUT -H 'Content-Type: application/json' --data '{"on": true }' ${url}
-`);
-
-  const thing = makeThing();
-  const server = new WebThingServer(new SingleThing(thing), port);
-  process.on('SIGINT', () => {
+  var thing = makeThing();
+  var server = new WebThingServer(new SingleThing(thing), port);
+  process.on('SIGINT', function(){
     server.stop();
     process.exit();
   });
