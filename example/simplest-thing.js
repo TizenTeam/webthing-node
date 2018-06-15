@@ -14,17 +14,20 @@ var SingleThing = index.server.SingleThing;
 var Thing = index.Thing;
 var Value = index.Value;
 var WebThingServer = index.server.WebThingServer;
+var gpio = require('gpio');
 
-function makeThing() {
+function makeThing(context) {
   var thing = new Thing('ActuatorExample', 
                         'onOffSwitch',
-                        'An actuator example that just log');
-
+                        'An actuator example that just update GPIO');
+  context.onPropertyOnValueChange = function(update) {
+    console.log("change: " + update);
+  };
   thing.addProperty(
     new Property(thing,
                  'on', 
                  new Value(true, function(update) {
-                   console.log("change: " + update);
+                   context.onPropertyOnValueChange(update);
                  }),
                  {
                    '@type': 'OnOffProperty',
@@ -37,20 +40,41 @@ function makeThing() {
 
 function runServer() {
   var port = process.argv[2] ? Number(process.argv[2]) : 8888;
+  var pin = process.argv[3] ? Number(process.argv[3]) : 45;
   var url = 'http://localhost:' + port + '/properties/on';
 
   console.log('Usage:\n'
-              + process.argv[0] + ' ' + process.argv[1] + ' [port]\n\n'
+              + process.argv[0] + ' ' + process.argv[1] + ' [port] [gpio]\n'
               + 'Try:\ncurl -X PUT -H "Content-Type: application/json" --data \'{"on": true }\' '
               + url + '\n');
 
-  var thing = makeThing();
+  var context = {
+    onPropertyOnValueChange: null,
+  };
+  var thing = makeThing(context);
   var server = new WebThingServer(new SingleThing(thing), port);
   process.on('SIGINT', function(){
     server.stop();
     process.exit();
   });
-  server.start();
+  var gpio_out = gpio.open({
+    pin: pin,
+    direction: gpio.DIRECTION.OUT
+  }, function(err) {
+    if (err) {
+      console.log("error: gpio: Can't be opened on pin " + pin);
+      return err;
+    }
+    context.onPropertyOnValueChange = function(value) {
+      try {
+        console.log("gpio: writing: " + value);
+        gpio_out.write(value);
+      } catch(err) {
+        console.log("error: gpio: "  + pin);
+      }
+    }
+    server.start();
+  });
 }
 
 runServer();
