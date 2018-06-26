@@ -8,7 +8,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.*
  */
-var index  = require('webthing');
+var index  = require('../index');
 var Property = index.Property;
 var SingleThing = index.server.SingleThing;
 var Thing = index.Thing;
@@ -16,29 +16,26 @@ var Value = index.Value;
 var WebThingServer = index.server.WebThingServer;
 var fs = require('fs');
 var Mastodon = require('mastodon-lite');
-var conf = ".mastodon-lite.json";
+var conf = process.env.HOME + "/.mastodon-lite.json";
 var config = JSON.parse(fs.readFileSync(conf, 'utf8'));
 var mastodon = Mastodon(config);
 
-function handleLevelUpdate(value)
-{ 
-  var message = "https://s-opensource.org/tag/wot/# #MultiLevelSwitch is \"" + value + "\" (#MastodonLite #WebThing Actuator)";
-  console.log(message);
-  mastodon.post(message);
-}
+function makeThing(context) {
+  var thing = new Thing('MultiLevelSwitchExample', 'multiLevelSwitch', 'An actuator example that just blog');
+  context.onPropertyOnValueChange = function(update) {
+    console.log(update);
+  };
 
-function makeThing() {
-  var thing = new Thing('MastodonMultiLevelSwitchExample', 'multiLevelSwitch', 'An actuator example that just blog');
+  var value = new Value(0, function(update) {
+    context.onPropertyOnValueChange(update);
+  });
 
   thing.addProperty(
     new Property(thing,
                  'level',
-                 new Value(0, handleLevelUpdate),
-                 {
-                   label: 'Level',
-                   type: 'number',
-                   description: 'Whether the output is changed'
-                 }));
+                 value,
+                 {type: 'number',
+                  description: 'Whether the output is changed'}));
   return thing;
 }
 
@@ -50,12 +47,23 @@ function runServer() {
               + 'Try:\ncurl -H "Content-Type: application/json" '
               + url + '\n');
 
-  var thing = makeThing();
+  var context = {
+    onPropertyOnValueChange: null,
+  };
+  var thing = makeThing(context);
   var server = new WebThingServer(new SingleThing(thing), port);
   process.on('SIGINT', function(){
     server.stop();
     process.exit();
   });
+  context.onPropertyOnValueChange = function(value) {
+    if ( value ) {
+      var message = value;
+      message = "https://s-opensource.org/tag/iotjs/# #MultiLevelSwitch is \"" +  value + "\" (#WebThing powered by #MastodonLite #IoTjs and #MozillaIot)"
+      console.log(message);
+      mastodon.post(message);
+    }
+  }
   server.start();
 }
 
