@@ -15,6 +15,17 @@ var Thing = index.Thing;
 var Value = index.Value;
 var WebThingServer = index.server.WebThingServer;
 var gpio = require('gpio');
+if (!gpio.DIRECTION) {
+  gpio.DIRECTION = {};
+  if (!gpio.DIRECTION.IN) {
+    gpio.DIRECTION.IN = "in";
+  }
+}
+if (!gpio.open) {
+  gpio.open = function(config, callback) {
+    gpio.export(config.pin, config, callback);
+  }
+}
 
 function makeThing(context) {
   var self = this;
