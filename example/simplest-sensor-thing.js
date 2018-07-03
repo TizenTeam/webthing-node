@@ -70,16 +70,21 @@ function runServer() {
     ready: function(){
       console.log("read on pin" + pin);
       self.gpio_in.on("change", function(value) {
-        console.log(value);
-        self.thing.value.notifyOfExternalUpdate(value);
+        if (value && value != self.previous ) {
+          self.previous = value;
+          value = ! self.thing.value.get();
+          console.log("switching: " + value);
+          self.thing.value.notifyOfExternalUpdate(value);
+        }
+        self.previous = value;
       });
       self.server.start();
     }
   });
 
   setInterval(function(){
-    console.log(self.gpio_in.value);
-  }, 1000);
+    //console.log(self.gpio_in.value);
+  }, 1);
 }
 
 runServer();
