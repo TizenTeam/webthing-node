@@ -14,18 +14,7 @@ var SingleThing = index.server.SingleThing;
 var Thing = index.Thing;
 var Value = index.Value;
 var WebThingServer = index.server.WebThingServer;
-var gpio = require('gpio');
-if (!gpio.DIRECTION) {
-  gpio.DIRECTION = {};
-  if (!gpio.DIRECTION.IN) {
-    gpio.DIRECTION.IN = "in";
-  }
-}
-if (!gpio.open) {
-  gpio.open = function(config, callback) {
-    gpio.export(config.pin, config, callback);
-  }
-}
+var Gpio = require('onoff').Gpio;
 
 function makeThing(context) {
   var self = this;
@@ -60,32 +49,36 @@ function runServer() {
   };
   self.thing = makeThing(context);
   self.server = new WebThingServer(new SingleThing(self.thing), port);
+  console.log("gpio: pin#" + pin);
+  const input = new Gpio(pin,'in', 'rising');
+  console.log("gpio: pin#" + pin);
+  self.delay = 5000; //TODO: update if needed 42 is good value too
+  self.count = 0;
+  self.lastOnDate = new Date();
+
   process.on('SIGINT', function(){
     server.stop();
+    input.unexport();
     process.exit();
   });
-  console.log("gpio: pin#" + pin);
-  self.gpio_in = gpio.export(pin, {
-    direction: 'in',
-    ready: function(){
-      console.log("read on pin" + pin);
-      self.gpio_in.on("change", function(value) {
-        if (value && value != self.previous ) {
-          self.previous = value;
-          value = ! self.thing.value.get();
-          console.log("switching: " + value);
-          self.thing.value.notifyOfExternalUpdate(value);
-        }
-        self.previous = value;
-      });
-      self.server.start();
+
+  input.watch(function (err, value) {
+    console.log("watch: " + value);
+    if (err) throw err;
+    if (!self.count++) {
+      return self.server.start();
+    }
+    var now = new Date();
+    var delay = (now - self.lastOnDate);
+    console.log("delay" + delay);
+    if (value && ( delay >= self.delay))
+    {
+      var toggle  = ! self.thing.value.get();
+      console.log("switching: " + toggle);
+      self.thing.value.notifyOfExternalUpdate(toggle);
+      self.lastOnDate = now;
     }
   });
-
-  setInterval(function(){
-    //console.log(self.gpio_in.value);
-  }, 1);
 }
 
 runServer();
-
