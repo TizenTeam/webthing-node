@@ -29,26 +29,23 @@ if (!gpio.open) {
 
 function makeThing(context) {
   var self = this;
-  var thing = new Thing('SensorExample', 'binarySensor', 'A sensor example that monitor a button');
+  var thing = new Thing('GpioSensorExample', 'binarySensor', 'A sensor example that monitor a button');
   self.context = context;
-  self.value = new Value(false);
+  thing.value = new Value(false);
   context.updatePropertyOnValue = function(value) {
     return !value;
   };
   thing.addProperty(
     new Property(thing,
-                 'level',
-                 value,
-                 {type: 'number',
+                 'onoff',
+                 thing.value,
+                 {type: 'boolean',
                   description: 'Whether the output is changed'}));
-  setInterval(function() {
-    var value = self.context.updatePropertyOnValue(self.value.lastValue);
-    self.value.notifyOfExternalUpdate(value);
-  }, 3000);
   return thing;
 }
 
 function runServer() {
+  var self = this;
   var port = process.argv[2] ? Number(process.argv[2]) : 8888;
   var pin = process.argv[3] ? Number(process.argv[3]) : 11;
   var url = 'http://localhost:' + port + '/properties/on';
@@ -61,32 +58,29 @@ function runServer() {
   var context = {
     updatePropertyOnValue: null,
   };
-  var thing = makeThing(context);
-  var server = new WebThingServer(new SingleThing(thing), port);
+  self.thing = makeThing(context);
+  self.server = new WebThingServer(new SingleThing(self.thing), port);
   process.on('SIGINT', function(){
     server.stop();
     process.exit();
   });
-  var gpio_in = gpio.open({
-    pin: pin,
-    direction: gpio.DIRECTION.IN
-  }, function(err) {
-    if (err) {
-      console.log("error: gpio: Can't be opened on pin " + pin);
-      return err;
+
+  self.gpio_in = gpio.export(pin, {
+    direction: 'in',
+    ready: function(){
+      console.log("read on pin" + pin);
+      self.gpio_in.on("change", function(value) {
+        console.log(value);
+        self.thing.value.notifyOfExternalUpdate(value);
+      });
+      self.server.start();
     }
-    context.updatePropertyOnValue = function(value) {
-      try {
-        console.log("gpio: reading: pin#" + pin);
-        value = gpio_in.readSync();
-        console.log("gpio: read: " + value);
-      } catch(err) {
-        console.log("error: gpio: "  + pin);
-      }
-      return value;
-    }
-    server.start();
   });
+
+  setInterval(function(){
+    console.log(self.gpio_in.value);
+  }, 1000);
 }
 
 runServer();
+
