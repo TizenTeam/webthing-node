@@ -12,10 +12,10 @@
  */
 var _require = require('webthing'),
     Property = _require.Property,
-    SingleThing = _require.SingleThing,
+    SingleThing = _require.server.SingleThing,
     Thing = _require.Thing,
     Value = _require.Value,
-    WebThingServer = _require.WebThingServer;
+    WebThingServer = _require.server.WebThingServer;
 
 function makeThing() {
   var thing = new Thing('ActuatorExample', ['OnOffSwitch'], 'An actuator example that just log');
