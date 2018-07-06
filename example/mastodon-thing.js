@@ -16,7 +16,7 @@ var Value = index.Value;
 var WebThingServer = index.server.WebThingServer;
 var fs = require('fs');
 var Mastodon = require('mastodon-lite');
-var conf = ".mastodon-lite.json";
+var conf = "/rom/webthing-node/" + ".mastodon-lite.json";
 var config = JSON.parse(fs.readFileSync(conf, 'utf8'));
 var mastodon = Mastodon(config);
 
@@ -33,7 +33,7 @@ function makeThing() {
   thing.addProperty(
     new Property(thing,
                  'level',
-                 new Value(0, handleLevelUpdate),
+                 new Value(0, function(value) { handleLevelUpdate(value); }),
                  {
                    label: 'Level',
                    type: 'number',
