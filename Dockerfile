@@ -16,7 +16,7 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV LC_ALL en_US.UTF-8
 ENV LANG ${LC_ALL}
 
-ENV project webthing-node
+ENV project webthing-iotjs
 RUN echo "#log: Configuring locales" \
   && set -x \
   && apt-get update -y \
@@ -29,35 +29,36 @@ RUN echo "#log: Configuring locales" \
 RUN echo "#log: ${project}: Setup system" \
   && set -x \
   && apt-get update -y \
-  && apt-get install -y npm \
+  && apt-get install -y sudo apt-transport-https make \
+  && apt-cache show iotjs || echo "TODO: it's in debian testing! "\
   && apt-get clean \
+  && sync
+
+RUN echo "#log: ${project}: Setup system: Install iotjs" \
+  && set -x \
+  && sudo apt-get update -y \
+  && version="debian:latest" \
+  && cat /etc/os-release \
+  && distro="xUbuntu_18.04" \
+  && url="http://download.opensuse.org/repositories/home:/rzrfreefr:/snapshot/$distro" \
+  && file="/etc/apt/sources.list.d/org_opensuse_home_rzrfreefr_snapshot.list" \
+  && echo "deb [allow-insecure=yes] $url /" | sudo tee "$file" \
+  && sudo apt-get update -y \
+  && version=$(apt-cache show "iotjs-snapshot " \
+| grep 'Version:' | cut -d' ' -f2 | sort -n | head -n1 || echo 0) \
+  && sudo apt-get install -y --allow-unauthenticated iotjs-snapshot=$version iotjs=$version \
   && sync
 
 ADD . /usr/local/${project}/${project}
 WORKDIR /usr/local/${project}/${project}
 RUN echo "#log: ${project}: Preparing sources" \
   && set -x \
-  && node --version \
-  && which npm \
-  && npm --version \
-  && npm install \
-  && sync
-
-WORKDIR /usr/local/${project}/${project}
-RUN echo "#log: ${project}: Patching" \
-  && echo 'exports.logging = true;' >> node_modules/gpio/lib/gpio.js \
-  && echo 'TODO: https://github.com/EnotionZ/GpiO/pull/50' \
-  && sed -e 's|fs.exists | fs.existsSync|g' -i node_modules/gpio/lib/gpio.js \
-  && sync
-
-WORKDIR /usr/local/${project}/${project}
-RUN echo "#log: ${project}: Testing" \
-  && ls -l /sys/class/gpio \
-     /sys/bus/platform/devices \
-  && npm run test || echo "TODO: check package.json" \
+  && make setup \
+  && make \
+  && make check \
   && sync
 
 EXPOSE 8888
 WORKDIR /usr/local/${project}/${project}
-ENTRYPOINT [ "/usr/bin/npm", "run" ]
-CMD [ "start" ]
+ENTRYPOINT [ "/usr/bin/make"]
+CMD [ "run" ]
