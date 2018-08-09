@@ -9,7 +9,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.*
 #}
 
-FROM node:10
+FROM ubuntu:18.04
 MAINTAINER Philippe Coval (p.coval@samsung.com)
 
 ENV DEBIAN_FRONTEND noninteractive
@@ -17,6 +17,22 @@ ENV LC_ALL en_US.UTF-8
 ENV LANG ${LC_ALL}
 
 ENV project webthing-node
+RUN echo "#log: Configuring locales" \
+  && set -x \
+  && apt-get update -y \
+  && apt-get install -y locales \
+  && echo "${LC_ALL} UTF-8" | tee /etc/locale.gen \
+  && locale-gen ${LC_ALL} \
+  && dpkg-reconfigure locales \
+  && sync
+
+RUN echo "#log: ${project}: Setup system" \
+  && set -x \
+  && apt-get update -y \
+  && apt-get install -y npm \
+  && apt-get clean \
+  && sync
+
 ADD . /usr/local/${project}/${project}
 WORKDIR /usr/local/${project}/${project}
 RUN echo "#log: ${project}: Preparing sources" \
@@ -43,5 +59,5 @@ RUN echo "#log: ${project}: Testing" \
 
 EXPOSE 8888
 WORKDIR /usr/local/${project}/${project}
-ENTRYPOINT [ "/usr/local/bin/npm", "run" ]
+ENTRYPOINT [ "/usr/bin/npm", "run" ]
 CMD [ "start" ]
