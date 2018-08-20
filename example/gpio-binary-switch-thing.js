@@ -50,11 +50,13 @@ ${process.argv[0]} ${process.argv[1]} [port] [gpio]
 Try:
 curl -X PUT -H 'Content-Type: application/json' --data '{"on": true }' ${url}
 `);
-  var output = null;
+  let output = null;
   this.onValueChange = (value) => {
-    console.log("gpio: set: "  + value);
-    if (output) output.set( (value) ? 1 : 0 );
-  }
+    console.log(`gpio: set: ${value}`);
+    if (output) {
+      output.set((value) ? 1 : 0);
+    }
+  };
   const thing = makeThing(this.onValueChange);
   const server = new WebThingServer(new SingleThing(thing), port);
   process.on('SIGINT', () => {
@@ -63,11 +65,10 @@ curl -X PUT -H 'Content-Type: application/json' --data '{"on": true }' ${url}
     process.exit();
   });
 
-  output = gpio.export(pin, {
-    direction: 'out',
-    ready: () => {
-      server.start();
-    }});
+  output = gpio.export(pin, {direction: 'out',
+                             ready: () => {
+                               server.start();
+                             }});
 }
 
 runServer();
