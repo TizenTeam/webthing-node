@@ -15,13 +15,13 @@ const {
   Value,
   WebThingServer,
 } = require('webthing');
-var gpio = require('gpio');
-var Gpio = require('onoff').Gpio;
+// const gpio = require('gpio');
+const Gpio = require('onoff').Gpio;
 
 function makeThing() {
-  var thing = new Thing('ToggleGpioBinarySensorExample',
-                        'binarySensor',
-                        'A sensor example that monitor GPIO input ie: button');
+  const thing = new Thing('ToggleGpioBinarySensorExample',
+                          'binarySensor',
+                          'A sensor that monitor GPIO input ie: button');
   thing.value = new Value(false);
   thing.addProperty(
     new Property(thing,
@@ -31,7 +31,7 @@ function makeThing() {
                    '@type': 'OnOffProperty',
                    label: 'On/Off',
                    type: 'boolean',
-                   description: 'Whether the input is changed'
+                   description: 'Whether the input is changed',
                  }));
   return thing;
 }
@@ -50,28 +50,30 @@ curl -H 'Content-Type: application/json' ${url}
   const thing = makeThing();
   const server = new WebThingServer(new SingleThing(thing), port);
   const input = new Gpio(pin, 'in', 'rising');
-  const delay = 5000; //TODO: update if needed 42 is a good value too
-  var lastOnDate;
+  const delay = 5000; // TODO: update if needed 42 is a good value too
+  let lastOnDate;
 
-  process.on('SIGINT', function(){
+  process.on('SIGINT', function() {
     server.stop();
     input.unexport();
     process.exit();
   });
 
-  input.watch(function (err, value) {
-    if (err) throw err;
+  input.watch(function(err, value) {
+    if (err) {
+      throw err;
+    }
     if (!lastOnDate) {
       console.log(`log: GPIO${pin}: ready: ${value}`);
       lastOnDate = new Date();
       return server.start();
     }
-    var now = new Date();
-    var elapsed = (now - lastOnDate);
-    console.log(`log: GPIO${pin}: change: ${value} (+${elapsed}ms - ${delay}ms)`);
-    if (value && (elapsed >= delay))
-    {
-      var toggle = !thing.value.get();
+    const now = new Date();
+    const elapsed = (now - lastOnDate);
+    console.log(`log: GPIO${pin}: change: ${value}
+ (+${elapsed}ms - ${delay}ms)`);
+    if (value && (elapsed >= delay)) {
+      const toggle = !thing.value.get();
       console.log(`log: GPIO${pin}: toggle: ${toggle}`);
       thing.value.notifyOfExternalUpdate(toggle);
       lastOnDate = now;
