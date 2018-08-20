@@ -31,7 +31,7 @@
     "dnssd": "^0.4.1",
     "express": "^4.16.3",
     "express-ws": "^4.0.0",
-    "gpio": "^0.2.7",
+    "gpio": "^0.2.9",
     "local-ipv4-address": "^0.0.2",
     "onoff": "^3.1.0"
   },
