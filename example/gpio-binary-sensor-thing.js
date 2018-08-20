@@ -20,7 +20,7 @@ const gpio = require('gpio');
 function makeThing() {
   const thing = new Thing('GpioBinarySensorExample',
                           'binarySensor',
-                          'A sensor example that monitor GPIO input ie: button');
+                          'A sensor that monitor GPIO input (ie: button)');
   thing.value = new Value(false);
   thing.addProperty(
     new Property(thing,
@@ -30,7 +30,7 @@ function makeThing() {
                    '@type': 'OnOffProperty',
                    label: 'On/Off',
                    type: 'boolean',
-                   description: 'Whether the input is changed'
+                   description: 'Whether the input is changed',
                  }));
   return thing;
 }
@@ -57,17 +57,17 @@ curl -H 'Content-Type: application/json' ${url}
   const input = gpio.export(pin, {
     direction: 'in',
     ready: () => {
-      input.value = undefined;
+      // input.value = undefined; //TODO
       input._get((value) => {
         console.log(`log: GPIO${pin}: ready: ${value}`);
-        input.on("change", (value) => {
+        input.on('change', (value) => {
           console.log(`log: GPIO${pin}: change: ${value}`);
           thing.value.notifyOfExternalUpdate(Boolean(value));
         });
         server.start();
         thing.value.notifyOfExternalUpdate(Boolean(value));
       });
-    }
+    },
   });
 }
 
