@@ -15,28 +15,32 @@ const console = require('console');
 // Disable logs here by editing to '!console.log'
 const log = console.log || function() {};
 
-const {
-  Property,
-  Value,
-} = require('webthing');
 
-const adc = require('../adc');
+let webthing;
+try {
+  webthing = require('../../../webthing');
+} catch (err) {
+  webthing = require('webthing');
+}
+const Property = webthing.Property;
+const Value = webthing.Value;
 
-class AdcInProperty extends Property {
-  constructor(thing, name, value, metadata, config) {
-    const valueObject = new Value(Number(value), () => {
-    });
-    super(thing, name, valueObject,
-          {
-            '@type': 'LevelProperty',
-            label: (metadata && metadata.label) || `Level: ${name}`,
-            type: 'number',
-            readOnly: true,
-            description:
-            (metadata && metadata.description) ||
-              (`ADC Sensor on pin=${config.pin}`),
-          });
-    const self = this;
+const adc = require('adc');
+
+function AdcInProperty(thing, name, value, metadata, config) {
+  const self = this;
+  const valueObject = new Value(Number(value), () => {
+  });
+  Property.call(this, thing, name, this.valueObject, {
+    '@type': 'LevelProperty',
+    label: (metadata && metadata.label) || `Level: ${name}`,
+    type: 'number',
+    readOnly: true,
+    description:
+    (metadata && metadata.description) ||
+      (`ADC Sensor on pin=${config.pin}`),
+  });
+  {
     this.valueObject = valueObject;
     config.frequency = config.frequency || 1;
     config.range = config.range || 4096;
@@ -63,7 +67,7 @@ class AdcInProperty extends Property {
     });
   }
 
-  close() {
+  self.close = () => {
     try {
       this.inverval && clearInterval(this.inverval);
       this.port && this.port.closeSync();
@@ -72,7 +76,9 @@ class AdcInProperty extends Property {
       return err;
     }
     log(`log: ADC: ${self.getName()}: close:`);
-  }
+  };
+
+  return this;
 }
 
 function AdcProperty(thing, name, value, metadata, config) {
