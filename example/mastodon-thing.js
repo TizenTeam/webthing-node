@@ -21,7 +21,7 @@ const Mastodon = require('mastodon-lite');
 const conf = '.mastodon-lite.json';
 const config = JSON.parse(fs.readFileSync(conf, 'utf8'));
 const mastodon = Mastodon(config);
-var lastHandle = new Date();
+var lastHandle = 0;
 
 function handleLevelUpdate(value)
 { 
