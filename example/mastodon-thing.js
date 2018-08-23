@@ -53,7 +53,7 @@ function makeThing() {
 
 function runServer() {
   const port = process.argv[2] ? Number(process.argv[2]) : 8042;
-  const url = `http://localhost:${port}/properties/multiLevelSwitch`;
+  const url = `http://localhost:${port}/properties/level`;
   console.log('Usage:\n'
               + process.argv[0] + ' ' + process.argv[1] + ' [port]\n'
               + 'Try:\ncurl -H "Content-Type: application/json" '
