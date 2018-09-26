@@ -24,9 +24,7 @@ const adc = require('../adc');
 
 class AdcInProperty extends Property {
   constructor(thing, name, value, metadata, config) {
-    const valueObject = new Value(Number(value), () => {
-    });
-    super(thing, name, valueObject,
+    super(thing, name, new Value(Number(value)),
           {
             '@type': 'LevelProperty',
             label: (metadata && metadata.label) || `Level: ${name}`,
@@ -37,12 +35,11 @@ class AdcInProperty extends Property {
               (`ADC Sensor on pin=${config.pin}`),
           });
     const self = this;
-    this.valueObject = valueObject;
     config.frequency = config.frequency || 1;
-    config.range = config.range || 4096;
+    config.range = config.range || 0xFFF;
     this.period = 1000.0 / config.frequency;
     this.config = config;
-    this.port = adc.open(config, function(err) {
+    this.port = adc.open(config, (err) => {
       log(`log: ADC: ${self.getName()}: open: ${err} (null expected)`);
       if (err) {
         console.error(`errror: ADC: ${self.getName()}: Fail to open:\
