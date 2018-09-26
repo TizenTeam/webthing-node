@@ -9,7 +9,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.*
 #}
 
-FROM node:8-stretch
+FROM node:10
 MAINTAINER Philippe Coval (p.coval@samsung.com)
 
 ENV DEBIAN_FRONTEND noninteractive
@@ -21,9 +21,14 @@ ADD . /usr/local/${project}/${project}
 WORKDIR /usr/local/${project}/${project}
 RUN echo "#log: ${project}: Preparing sources" \
   && set -x \
+  && node --version \
   && which npm \
   && npm --version \
   && npm install \
+  && echo 'exports.logging = true;' >> node_modules/gpio/lib/gpio.js \
+  && echo 'TODO: https://github.com/EnotionZ/GpiO/pull/50'
+  && sed -e 's|fs.exists | fs.existsSync|g' -i node_modules/gpio/lib/gpio.js \
+  && ls -l /sys/class/gpio \
   && npm run test || echo "TODO: check package.json" \
   && sync
 
