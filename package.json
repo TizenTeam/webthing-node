@@ -5,6 +5,7 @@
   "main": "webthing.js",
   "scripts": {
     "lint": "eslint .",
+    "platform": "NODE_PATH=. node example/platform",
     "start": "NODE_PATH=. node example/multiple-things",
     "test": "echo \"Error: no test specified\" && exit 1",
     "simplest": "NODE_PATH=. node example/simplest-thing"
@@ -32,6 +33,7 @@
     "dnssd": "^0.4.1",
     "express": "^4.16.3",
     "express-ws": "^4.0.0",
+    "gpio": "^0.2.9",
     "internal-ip": "^3.0.1"
   },
   "devDependencies": {
