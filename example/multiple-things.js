@@ -126,7 +126,7 @@ function runServer() {
     process.exit();
   });
 
-  server.start().catch(console.error);
+  server.start();
 }
 
 runServer();
