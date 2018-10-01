@@ -25,9 +25,17 @@ RUN echo "#log: ${project}: Preparing sources" \
   && which npm \
   && npm --version \
   && npm install \
+  && sync
+
+WORKDIR /usr/local/${project}/${project}
+RUN echo "#log: ${project}: Patching" \
   && echo 'exports.logging = true;' >> node_modules/gpio/lib/gpio.js \
   && echo 'TODO: https://github.com/EnotionZ/GpiO/pull/50' \
   && sed -e 's|fs.exists | fs.existsSync|g' -i node_modules/gpio/lib/gpio.js \
+  && sync
+
+WORKDIR /usr/local/${project}/${project}
+RUN echo "#log: ${project}: Testing" \
   && ls -l /sys/class/gpio \
   && npm run test || echo "TODO: check package.json" \
   && sync
