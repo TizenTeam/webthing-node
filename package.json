@@ -33,7 +33,7 @@
     "dnssd": "^0.4.1",
     "express": "^4.16.3",
     "express-ws": "^4.0.0",
-    "gpio": "^0.2.9",
+    "gpio": "^0.2.10",
     "internal-ip": "^3.0.1"
   },
   "devDependencies": {
