@@ -26,7 +26,7 @@ RUN echo "#log: ${project}: Preparing sources" \
   && npm --version \
   && npm install \
   && echo 'exports.logging = true;' >> node_modules/gpio/lib/gpio.js \
-  && echo 'TODO: https://github.com/EnotionZ/GpiO/pull/50'
+  && echo 'TODO: https://github.com/EnotionZ/GpiO/pull/50' \
   && sed -e 's|fs.exists | fs.existsSync|g' -i node_modules/gpio/lib/gpio.js \
   && ls -l /sys/class/gpio \
   && npm run test || echo "TODO: check package.json" \
