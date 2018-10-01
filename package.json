@@ -28,6 +28,12 @@
   },
   "homepage": "https://github.com/mozilla-iot/webthing-node#readme",
   "dependencies": {
+    "@babel/cli": "^7.1.2",
+    "@babel/core": "^7.1.2",
+    "@babel/plugin-transform-arrow-functions": "^7.0.0",
+    "@babel/plugin-transform-block-scoping": "^7.0.0",
+    "@babel/plugin-transform-template-literals": "^7.0.0",
+    "@babel/preset-env": "^7.1.0",
     "ajv": "^6.5.3",
     "body-parser": "^1.18.3",
     "dnssd": "^0.4.1",
