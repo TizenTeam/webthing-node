@@ -23,9 +23,9 @@ const GpioProperty = require('../gpio/gpio-property');
 function FlexPHatThing(name, type, description) {
   const self = this;
   Thing.call(this,
-               name || 'FlexPHat',
-               type || [],
-               description || 'A web connected Flex RaspberryPi Hat');
+             name || 'FlexPHat',
+             type || [],
+             description || 'A web connected Flex RaspberryPi Hat');
   {
     this.gpioProperties = [
       new GpioProperty(this, 'Relay', false,
