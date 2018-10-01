@@ -29,7 +29,7 @@ function ARTIK05xThing(name, type, description) {
   {
     var _this = this;
 
-    this.gpioProperties = [new GpioProperty(this, 'BlueLed', false, {
+    this.pinProperties = [new GpioProperty(this, 'BlueLed', false, {
       description: 'Blue LED on ARTIK05x board (on GPIO45)'
     }, {
       direction: 'out',
@@ -52,25 +52,23 @@ function ARTIK05xThing(name, type, description) {
     }), new AdcProperty(this, 'ADC1', 0, {
       description: 'Analog port of ARTIK05x'
     }, {
-      adc: {
         device: '/dev/adc0',
+        direction: 'in',
         pin: 0
-      }
     }), new AdcProperty(this, "ADC2", 0, {
       description: 'Analog port of ARTIK05x'
     }, {
-      adc: {
         device: '/dev/adc0',
+        direction: 'in',
         pin: 1
-      }
     })];
-    this.gpioProperties.forEach(function (property) {
+    this.pinProperties.forEach(function (property) {
       _this.addProperty(property);
     });
   }
 
   this.close = function () {
-    _this2.gpioProperties.forEach(function (property) {
+    _this2.pinProperties.forEach(function (property) {
       property.close && property.close();
     });
   };
