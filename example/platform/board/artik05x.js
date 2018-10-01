@@ -67,8 +67,8 @@ function ARTIK05xThing(name, type, description) {
     });
   }
 
-  this.close = function() {
-    this.pinProperties.forEach(function(property) {
+  this.close = function () {
+    self.pinProperties.forEach(function (property) {
       property.close && property.close();
     });
   };
