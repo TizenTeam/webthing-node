@@ -52,7 +52,7 @@ function ExampleDimmableLight() {
       new Value(true, (v) => console.log('On-State is now', v)),
       {type: 'boolean',
        description: 'Whether the lamp is turned on'});
-  }
+  };
 
   this.getLevelProperty = () => {
     return new Property(
@@ -63,7 +63,7 @@ function ExampleDimmableLight() {
        description: 'The level of light from 0-100',
        minimum: 0,
        maximum: 100});
-  }
+  };
 
   this.addProperty(this.getOnProperty());
   this.addProperty(this.getLevelProperty());
@@ -75,8 +75,8 @@ function ExampleDimmableLight() {
  */
 function FakeGpioHumiditySensor() {
   Thing.call(this, 'My Humidity Sensor',
-          ['MultiLevelSensor'],
-          'A web connected humidity sensor');
+             ['MultiLevelSensor'],
+             'A web connected humidity sensor');
   {
     this.level = new Value(0.0);
     this.addProperty(
@@ -109,7 +109,7 @@ function FakeGpioHumiditySensor() {
    */
   this.readFromGPIO = () => {
     return Math.abs(70.0 * Math.random() * (-0.5 + Math.random()));
-  }
+  };
 }
 
 function runServer() {
