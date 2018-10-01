@@ -9,7 +9,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.*
 #}
 
-FROM ubuntu:18.04
+FROM node:10-stretch
 MAINTAINER Philippe Coval (p.coval@samsung.com)
 
 ENV DEBIAN_FRONTEND noninteractive
@@ -38,8 +38,9 @@ RUN echo "#log: ${project}: Setup system: Install iotjs" \
   && set -x \
   && sudo apt-get update -y \
   && version="debian:latest" \
-  && cat /etc/os-release \
-  && distro="xUbuntu_18.04" \
+  && . etc/os-release \
+  && distro="${ID}-${VERSION_ID}" \
+  && distro=$(echo "${distro}" | sed 's/.*/\U&/') \
   && url="http://download.opensuse.org/repositories/home:/rzrfreefr:/snapshot/$distro" \
   && file="/etc/apt/sources.list.d/org_opensuse_home_rzrfreefr_snapshot.list" \
   && echo "deb [allow-insecure=yes] $url /" | sudo tee "$file" \
