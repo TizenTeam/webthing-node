@@ -23,8 +23,11 @@ const AdcProperty = require('../adc/adc-property');
 const GpioProperty = require('../gpio/gpio-property');
 
 function ARTIK05xThing(name, type, description) {
-
-  Thing.call(this, name || 'ARTIK05x', type || [], description || 'A web connected ARTIK05x');
+  var self = this;
+  Thing.call(this,
+             name || 'ARTIK05x',
+             type || [],
+             description || 'A web connected ARTIK05x');
   {
     this.pinProperties = [new GpioProperty(this, 'BlueLed', false, {
       description: 'Blue LED on ARTIK05x board (on GPIO45)',
@@ -59,8 +62,8 @@ function ARTIK05xThing(name, type, description) {
       direction: 'in',
       pin: 1,
     })];
-    this.pinProperties.forEach(function(property) {
-      this.addProperty(property);
+    this.pinProperties.forEach(function (property) {
+      self.addProperty(property);
     });
   }
 
