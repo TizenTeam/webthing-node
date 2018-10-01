@@ -9,7 +9,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.*
  */
-const fs = require('fs');
+var fs = require('fs');
 
 function Adc() {
   this.DIRECTION = {
@@ -27,7 +27,7 @@ function Adc() {
 
   this.readSync = function () {
     console.log('Adc.readSync: ');
-    const contents = fs.readFileSync(this.filename, 'utf8');
+    var contents = fs.readFileSync(this.filename, 'utf8');
     return contents;
   };
 

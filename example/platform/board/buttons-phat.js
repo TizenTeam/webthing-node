@@ -9,16 +9,16 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.*
  */
-const {
+var {
   Thing
 } = require('webthing');
 
-const GpioProperty = require('../gpio/gpio-property');
+var GpioProperty = require('../gpio/gpio-property');
 
 class ButtonsPHatThing extends Thing {
   constructor(name, type, description) {
     super(name || 'PlayPHat', type || [], description || 'A web connected Play RaspberryPi Hat');
-    const self = this;
+    var self = this;
     this.gpioProperties = [new GpioProperty(this, 'B1', false, {
       description: 'SW1 Sensor Bottom Button on GPIO4 (Pin7)'
     }, {
@@ -35,13 +35,13 @@ class ButtonsPHatThing extends Thing {
       direction: 'in',
       pin: 26
     })];
-    this.gpioProperties.forEach(property => {
+    this.gpioProperties.forEach(function (property) {
       self.addProperty(property);
     });
   }
 
   close() {
-    this.gpioProperties.forEach(property => {
+    this.gpioProperties.forEach(function (property) {
       property.close && property.close();
     });
   }

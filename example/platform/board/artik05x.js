@@ -9,7 +9,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.*
  */
-let webthing;
+var webthing;
 
 try {
   webthing = require('../../../webthing');
@@ -17,14 +17,14 @@ try {
   webthing = require('webthing');
 }
 
-const Thing = webthing.Thing;
+var Thing = webthing.Thing;
 
-const AdcProperty = require('../adc/adc-property');
+var AdcProperty = require('../adc/adc-property');
 
-const GpioProperty = require('../gpio/gpio-property');
+var GpioProperty = require('../gpio/gpio-property');
 
 function ARTIK05xThing(name, type, description) {
-  const self = this;
+  var self = this;
   Thing.call(this, name || 'ARTIK05x', type || [], description || 'A web connected ARTIK05x');
   {
     this.pinProperties = [new GpioProperty(this, 'BlueLed', false, {

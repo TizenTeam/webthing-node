@@ -9,12 +9,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.*
  */
-const console = require('console'); // Disable logs here by editing to '!console.log'
+var console = require('console'); // Disable logs here by editing to '!console.log'
 
 
-const log = console.log || function () {};
+var log = console.log || function () {};
 
-let webthing;
+var webthing;
 
 try {
   webthing = require('../../../webthing');
@@ -22,20 +22,22 @@ try {
   webthing = require('webthing');
 }
 
-const Property = webthing.Property;
-const Value = webthing.Value;
+var Property = webthing.Property;
+var Value = webthing.Value;
 
-const adc = require('adc');
+var adc = require('adc');
 
 function AdcInProperty(thing, name, value, metadata, config) {
-  const self = this;
-  const valueObject = new Value(Number(value), () => {});
+  var _this = this;
+
+  var self = this;
+  var valueObject = new Value(Number(value), function () {});
   Property.call(this, thing, name, this.valueObject, {
     '@type': 'LevelProperty',
-    label: metadata && metadata.label || `Level: ${name}`,
+    label: metadata && metadata.label || "Level: ".concat(name),
     type: 'number',
     readOnly: true,
-    description: metadata && metadata.description || `ADC Sensor on pin=${config.pin}`
+    description: metadata && metadata.description || "ADC Sensor on pin=".concat(config.pin)
   });
   {
     this.valueObject = valueObject;
@@ -44,22 +46,20 @@ function AdcInProperty(thing, name, value, metadata, config) {
     this.period = 1000.0 / config.frequency;
     this.config = config;
     this.port = adc.open(config, function (err) {
-      log(`log: ADC: ${self.getName()}: open: ${err} (null expected)`);
+      log("log: ADC: ".concat(self.getName(), ": open: ").concat(err, " (null expected)"));
 
       if (err) {
-        console.error(`errror: ADC: ${self.getName()}: Fail to open:\
- ${config.pin}`);
+        console.error("errror: ADC: ".concat(self.getName(), ": Fail to open: ").concat(config.pin));
         return null;
       }
 
-      self.inverval = setInterval(() => {
-        let value = self.port.readSync();
-        log(`log: ADC:\
- ${self.getName()}: update: 0x${Number(value).toString(0xF)}`);
+      self.inverval = setInterval(function () {
+        var value = self.port.readSync();
+        log("log: ADC: ".concat(self.getName(), ": update: 0x").concat(Number(value).toString(0xF)));
         value = Number(Math.floor(100.0 * value / self.config.range));
 
         if (value !== self.lastValue) {
-          log(`log: ADC: ${self.getName()}: change: ${value}%`);
+          log("log: ADC: ".concat(self.getName(), ": change: ").concat(value, "%"));
           self.valueObject.notifyOfExternalUpdate(value);
           self.lastValue = value;
         }
@@ -67,16 +67,16 @@ function AdcInProperty(thing, name, value, metadata, config) {
     });
   }
 
-  self.close = () => {
+  self.close = function () {
     try {
-      this.inverval && clearInterval(this.inverval);
-      this.port && this.port.closeSync();
+      _this.inverval && clearInterval(_this.inverval);
+      _this.port && _this.port.closeSync();
     } catch (err) {
-      console.error(`error: ADC: ${this.getName()} close:${err}`);
+      console.error("error: ADC: ".concat(_this.getName(), " close:").concat(err));
       return err;
     }
 
-    log(`log: ADC: ${self.getName()}: close:`);
+    log("log: ADC: ".concat(self.getName(), ": close:"));
   };
 
   return this;

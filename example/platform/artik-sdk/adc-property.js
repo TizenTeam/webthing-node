@@ -11,12 +11,12 @@
  */
 'use strict';
 
-const console = require('console'); // Disable logs here by editing to '!console.log'
+var console = require('console'); // Disable logs here by editing to '!console.log'
 
 
-const log = console.log || function () {};
+var log = console.log || function () {};
 
-let webthing;
+var webthing;
 
 try {
   webthing = require('../../../webthing');
@@ -24,22 +24,22 @@ try {
   webthing = require('webthing');
 }
 
-const Property = webthing.Property;
-const Value = webthing.Value;
+var Property = webthing.Property;
+var Value = webthing.Value;
 
-const artik = require('artik-sdk');
+var artik = require('artik-sdk');
 
 function AdcInProperty(thing, name, value, metadata, config) {
-  const self = this; // name || name = `ADC${config.pin}`;
+  var self = this; // name || name = `ADC${config.pin}`;
 
   Property.call(this, thing, name, new Value(value, function (value) {
     self.handleValueChanged && self.handleValueChanged(value);
   }), {
     '@type': 'LevelProperty',
-    label: metadata && metadata.label || `Level: ${name}`,
+    label: metadata && metadata.label || "Level: ".concat(name),
     type: 'number',
     readOnly: true,
-    description: metadata && metadata.description || `ADC Sensor on pin=${config.pin}`
+    description: metadata && metadata.description || "ADC Sensor on pin=".concat(config.pin)
   });
   {
     config.frequency = config.frequency || 1;
@@ -49,13 +49,12 @@ function AdcInProperty(thing, name, value, metadata, config) {
     this.port = artik.adc(config.pin, name);
     this.inverval = setInterval(function () {
       self.port.request();
-      let value = self.port.get_value();
-      log(`log: ADC: ${self.getName()}: update:
- 0x${Number(value).toString(0xF)}`);
+      var value = self.port.get_value();
+      log("log: ADC: ".concat(self.getName(), ": update:\n 0x").concat(Number(value).toString(0xF)));
       value = Number(Math.floor(100.0 * value / self.config.range));
 
       if (value !== self.lastValue) {
-        log(`log: ADC: ${self.getName()}: change: ${value}`);
+        log("log: ADC: ".concat(self.getName(), ": change: ").concat(value));
         self.value.notifyOfExternalUpdate(value);
         self.lastValue = value;
       }
@@ -67,11 +66,11 @@ function AdcInProperty(thing, name, value, metadata, config) {
       this.inverval && clearInterval(this.inverval);
       this.port = null;
     } catch (err) {
-      console.error(`error: ADC: ${self.getName()} close:${err}`);
+      console.error("error: ADC: ".concat(self.getName(), " close:").concat(err));
       return err;
     }
 
-    log(`log: ADC: ${self.getName()}: close:`);
+    log("log: ADC: ".concat(self.getName(), ": close:"));
   };
 
   return this;
