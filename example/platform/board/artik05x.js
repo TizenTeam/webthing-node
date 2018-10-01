@@ -23,7 +23,7 @@ const AdcProperty = require('../adc/adc-property');
 const GpioProperty = require('../gpio/gpio-property');
 
 function ARTIK05xThing(name, type, description) {
-  var self = this;
+  const self = this;
   Thing.call(this,
              name || 'ARTIK05x',
              type || [],
@@ -62,13 +62,13 @@ function ARTIK05xThing(name, type, description) {
       direction: 'in',
       pin: 1,
     })];
-    this.pinProperties.forEach(function (property) {
+    this.pinProperties.forEach(function(property) {
       self.addProperty(property);
     });
   }
 
-  this.close = function () {
-    self.pinProperties.forEach(function (property) {
+  this.close = function() {
+    self.pinProperties.forEach(function(property) {
       property.close && property.close();
     });
   };
