@@ -11,12 +11,13 @@
  */
 'use strict';
 
-const console = require('console');
+const console = require('console'); // Disable logs here by editing to '!console.log'
 
-// Disable logs here by editing to '!console.log'
-const log = console.log || function() {};
+
+const log = console.log || function () {};
 
 let webthing;
+
 try {
   webthing = require('../../../webthing');
 } catch (err) {
@@ -29,27 +30,24 @@ const Value = webthing.Value;
 const artik = require('artik-sdk');
 
 function AdcInProperty(thing, name, value, metadata, config) {
-  const self = this;
-  // name || name = `ADC${config.pin}`;
-  Property.call(this, thing, name, new Value(value, function(value) {
+  const self = this; // name || name = `ADC${config.pin}`;
+
+  Property.call(this, thing, name, new Value(value, function (value) {
     self.handleValueChanged && self.handleValueChanged(value);
-  }),
-                {
-                  '@type': 'LevelProperty',
-                  label: (metadata && metadata.label) || `Level: ${name}`,
-                  type: 'number',
-                  readOnly: true,
-                  description:
-            (metadata && metadata.description) ||
-              (`ADC Sensor on pin=${config.pin}`),
-                });
+  }), {
+    '@type': 'LevelProperty',
+    label: metadata && metadata.label || `Level: ${name}`,
+    type: 'number',
+    readOnly: true,
+    description: metadata && metadata.description || `ADC Sensor on pin=${config.pin}`
+  });
   {
     config.frequency = config.frequency || 1;
     config.range = config.range || 4096;
     self.period = 1000.0 / config.frequency;
     this.config = config;
     this.port = artik.adc(config.pin, name);
-    this.inverval = setInterval(function() {
+    this.inverval = setInterval(function () {
       self.port.request();
       let value = self.port.get_value();
       log(`log: ADC: ${self.getName()}: update:
@@ -64,7 +62,7 @@ function AdcInProperty(thing, name, value, metadata, config) {
     }, self.period);
   }
 
-  this.close = function() {
+  this.close = function () {
     try {
       this.inverval && clearInterval(this.inverval);
       this.port = null;
@@ -72,6 +70,7 @@ function AdcInProperty(thing, name, value, metadata, config) {
       console.error(`error: ADC: ${self.getName()} close:${err}`);
       return err;
     }
+
     log(`log: ADC: ${self.getName()}: close:`);
   };
 
@@ -82,6 +81,7 @@ function AdcProperty(thing, name, value, metadata, config) {
   if (config.direction === 'in') {
     return new AdcInProperty(thing, name, value, metadata, config);
   }
+
   throw 'error: Invalid param';
 }
 

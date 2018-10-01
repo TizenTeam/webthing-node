@@ -9,19 +9,19 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.*
  */
+const console = require('console'); // Disable logs here by editing to '!console.log'
 
-const console = require('console');
 
-// Disable logs here by editing to '!console.log'
-const log = console.log || function() {};
-
+const log = console.log || function () {};
 
 let webthing;
+
 try {
   webthing = require('../../../webthing');
 } catch (err) {
   webthing = require('webthing');
 }
+
 const Property = webthing.Property;
 const Value = webthing.Value;
 
@@ -29,16 +29,13 @@ const adc = require('adc');
 
 function AdcInProperty(thing, name, value, metadata, config) {
   const self = this;
-  const valueObject = new Value(Number(value), () => {
-  });
+  const valueObject = new Value(Number(value), () => {});
   Property.call(this, thing, name, this.valueObject, {
     '@type': 'LevelProperty',
-    label: (metadata && metadata.label) || `Level: ${name}`,
+    label: metadata && metadata.label || `Level: ${name}`,
     type: 'number',
     readOnly: true,
-    description:
-    (metadata && metadata.description) ||
-      (`ADC Sensor on pin=${config.pin}`),
+    description: metadata && metadata.description || `ADC Sensor on pin=${config.pin}`
   });
   {
     this.valueObject = valueObject;
@@ -46,18 +43,21 @@ function AdcInProperty(thing, name, value, metadata, config) {
     config.range = config.range || 4096;
     this.period = 1000.0 / config.frequency;
     this.config = config;
-    this.port = adc.open(config, function(err) {
+    this.port = adc.open(config, function (err) {
       log(`log: ADC: ${self.getName()}: open: ${err} (null expected)`);
+
       if (err) {
         console.error(`errror: ADC: ${self.getName()}: Fail to open:\
  ${config.pin}`);
         return null;
       }
+
       self.inverval = setInterval(() => {
         let value = self.port.readSync();
         log(`log: ADC:\
  ${self.getName()}: update: 0x${Number(value).toString(0xF)}`);
         value = Number(Math.floor(100.0 * value / self.config.range));
+
         if (value !== self.lastValue) {
           log(`log: ADC: ${self.getName()}: change: ${value}%`);
           self.valueObject.notifyOfExternalUpdate(value);
@@ -75,6 +75,7 @@ function AdcInProperty(thing, name, value, metadata, config) {
       console.error(`error: ADC: ${this.getName()} close:${err}`);
       return err;
     }
+
     log(`log: ADC: ${self.getName()}: close:`);
   };
 
@@ -85,6 +86,7 @@ function AdcProperty(thing, name, value, metadata, config) {
   if (config.direction === 'in') {
     return new AdcInProperty(thing, name, value, metadata, config);
   }
+
   throw 'error: Invalid param';
 }
 
