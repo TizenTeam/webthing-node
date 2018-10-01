@@ -37,6 +37,7 @@ RUN echo "#log: ${project}: Patching" \
 WORKDIR /usr/local/${project}/${project}
 RUN echo "#log: ${project}: Testing" \
   && ls -l /sys/class/gpio \
+     /sys/bus/platform/devices \
   && npm run test || echo "TODO: check package.json" \
   && sync
 
