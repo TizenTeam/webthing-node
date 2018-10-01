@@ -24,9 +24,9 @@ const GpioProperty = require('../gpio/gpio-property');
 function PlayPHatThing(name, type, description) {
   const self = this;
   Thing.call(this,
-               name || 'PlayPHat',
-               type || [],
-               description || 'A web connected Play RaspberryPi Hat');
+             name || 'PlayPHat',
+             type || [],
+             description || 'A web connected Play RaspberryPi Hat');
   {
     this.gpioProperties = [
       new GpioProperty(this, 'Left', false,
