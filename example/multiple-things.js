@@ -15,7 +15,10 @@ const WebThingServer = webthing.server.WebThingServer;
  */
 function ExampleDimmableLight() {
   {
-    Thing.call(this, 'My Lamp', ['OnOffSwitch', 'Light'], 'A web connected lamp');
+    Thing.call(this,
+               'My Lamp',
+               ['OnOffSwitch', 'Light'],
+               'A web connected lamp');
 
     this.addProperty(
       new Property(
