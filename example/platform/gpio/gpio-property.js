@@ -45,18 +45,19 @@ function GpioOutProperty(thing, name, value, metadata, config) {
     this.port = gpio.open({
       pin: config.pin,
       direction: gpio.DIRECTION.OUT
-    }, function (err) {
+    }, function (err, port) {
       log("log: GPIO: ".concat(self.getName(), ": open: ").concat(err));
 
       if (err) {
         console.error("error: GPIO: ".concat(self.getName(), ": Fail to open: ").concat(err));
         return err;
       }
-
+      self.port = port;
       self.handleValueChanged = function (value) {
         try {
           log("log: GPIO: ".concat(self.getName(), ": writing: ").concat(value));
           self.port.write(value);
+          log("log: GPIO: ".concat(self.getName(), ": writing: ").concat(value));
         } catch (err) {
           console.error("error: GPIO: \n".concat(self.getName(), ": Fail to write: ").concat(err));
           return err;
