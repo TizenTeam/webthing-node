@@ -32,7 +32,7 @@ function AdcInProperty(thing, name, value, metadata, config) {
 
   var self = this;
   var valueObject = new Value(Number(value), function () {});
-  Property.call(this, thing, name, this.valueObject, {
+  Property.call(this, thing, name, valueObject, {
     '@type': 'LevelProperty',
     label: metadata && metadata.label || "Level: ".concat(name),
     type: 'number',
