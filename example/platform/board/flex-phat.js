@@ -54,12 +54,12 @@ function FlexPHatThing(name, type, description) {
                        {direction: 'in', pin: 23}),
     ];
     this.gpioProperties.forEach((property) => {
-      this.addProperty(property);
+      self.addProperty(property);
     });
   }
 
   this.close = () => {
-    this.gpioProperties.forEach((property) => {
+    self.gpioProperties.forEach((property) => {
       property.close && property.close();
     });
   };
