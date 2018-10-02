@@ -9,16 +9,22 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.*
  */
-var {
-  Thing
-} = require('webthing');
+var webthing;
+
+try {
+  webthing = require('../../../webthing');
+} catch (err) {
+  webthing = require('webthing');
+}
+
+var Thing = webthing.Thing;
 
 var GpioProperty = require('../gpio/gpio-property');
 
-class ButtonsPHatThing extends Thing {
-  constructor(name, type, description) {
-    super(name || 'PlayPHat', type || [], description || 'A web connected Play RaspberryPi Hat');
-    var self = this;
+function ButtonsPHatThing(name, type, description) {
+  var self = this;
+  Thing.call(this, name || 'FlexPHat', type || [], description || 'A web connected Flex RaspberryPi Hat');
+  {
     this.gpioProperties = [new GpioProperty(this, 'B1', false, {
       description: 'SW1 Sensor Bottom Button on GPIO4 (Pin7)'
     }, {
@@ -34,18 +40,32 @@ class ButtonsPHatThing extends Thing {
     }, {
       direction: 'in',
       pin: 26
+    }), new GpioProperty(this, 'Green', false, {
+      description: 'SW3 Sensor button on GPIO22 (Pin15)'
+    }, {
+      direction: 'out',
+      pin: 4
+    }), new GpioProperty(this, 'Orange', false, {
+      description: 'SW3 Sensor button on GPIO22 (Pin15)'
+    }, {
+      direction: 'out',
+      pin: 3
+    }), new GpioProperty(this, 'Red', false, {
+      description: 'SW3 Sensor button on GPIO22 (Pin15)'
+    }, {
+      direction: 'out',
+      pin: 2
     })];
     this.gpioProperties.forEach(function (property) {
       self.addProperty(property);
     });
   }
-
-  close() {
+  this.close = function () {
     this.gpioProperties.forEach(function (property) {
       property.close && property.close();
     });
   }
-
+  return this;
 }
 
 module.exports = function () {
