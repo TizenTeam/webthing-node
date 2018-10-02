@@ -36,6 +36,10 @@ run/node: ${main_src} package.json /sys/class/gpio/export
 	ls $<
 	NODE_PATH=.:${topreldir}:${topreldir}/extra ${@F} $< ${run_args}
 
+
+board/%: ${main_src} board/%.js /sys/class/gpio/export
+	${runtime} $< ${@F}
+
 run: run/${runtime}
 
 force:
