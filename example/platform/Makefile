@@ -16,6 +16,7 @@ topreldir ?= ../..
 topdir ?= ${CURDIR}/${topreldir}
 run_args ?= start
 sudo ?= sudo
+SHELL := NODE_PATH=${topreldir} ${SHELL}
 
 default: check
 
@@ -24,12 +25,16 @@ default: check
 
 run/%: ${main_src} /sys/class/gpio/export
 	ls $<
+	-which ${@F}
 	${@F} $< ${run_args}
 
 run/node: ${main_src} package.json /sys/class/gpio/export
 	ls -l node_modules || ${MAKE} node_modules
 	ls -l ${topreldir}/node_modules || { cd ${topreldir} && npm install ; }
 	npm run ${run_args}
+
+board/%: ${main_src} board/%.js /sys/class/gpio/export
+	${runtime} $< ${@F}
 
 run: run/${runtime}
 
@@ -46,6 +51,11 @@ node_modules: package.json
 
 package.json:
 	npm init
+
+${topreldir}/node_modules: ${topreldir}/package.json
+	cd ${@D} && npm install
+
+node/setup: ${topreldir}/node_modules node_modules
 
 check/%: ${lib_srcs}
 	status=0 ; \
