@@ -9,6 +9,8 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.*
 #}
 
+default: all
+
 main_src ?= index.js
 lib_srcs ?= $(wildcard */*.js | sort)
 runtime ?= node
@@ -16,20 +18,30 @@ topreldir ?= ../..
 topdir ?= ${CURDIR}/${topreldir}
 run_args ?= start
 sudo ?= sudo
-
-default: check
+tmp_dir ?= tmp
+NODE_PATH := ${topreldir}:${NODE_PATH}
+export NODE_PATH
 
 %: %/${runtime}
 	echo "# $@: $^"
 
-run/%: ${main_src} /sys/class/gpio/export
-	ls $<
-	${@F} $< ${run_args}
+all: check
 
-run/node: ${main_src} package.json /sys/class/gpio/export
-	ls -l node_modules || ${MAKE} node_modules
-	ls -l ${topreldir}/node_modules || { cd ${topreldir} && npm install ; }
+setup/node: ${topreldir}/node_modules node_modules
+	@echo "NODE_PATH=$${NODE_PATH}"
+	@echo "$@: $^"
+
+run/%: /sys/class/gpio/export ${main_src} setup
+	ls -l $<
+	-which ${@F}
+	${@F} ${main_src} ${run_args}
+
+run/npm: /sys/class/gpio/export package.json setup
+	ls -l $<
 	npm run ${run_args}
+
+board/%: ${main_src} board/%.js /sys/class/gpio/export setup
+	${runtime} $< ${@F}
 
 run: run/${runtime}
 
@@ -46,6 +58,10 @@ node_modules: package.json
 
 package.json:
 	npm init
+
+${topreldir}/node_modules: ${topreldir}/package.json
+	cd ${@D} && npm install
+
 
 check/%: ${lib_srcs}
 	status=0 ; \
