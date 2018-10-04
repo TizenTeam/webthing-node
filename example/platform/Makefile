@@ -59,15 +59,32 @@ check/%: ${lib_srcs}
 
 check: check/${runtime}
 
+${topreldir}/node_modules:
+	cd ${@D} && npm install
+
+node/%: ${main_src} %.js ${topreldir}/node_modules
+	NODE_PATH=../.. ${runtime} $< ${@F}
+
+board/%: ${runtime}/board/%
+	sync
 
 flex-phat/%: ${main_src} /sys/class/gpio/export
 	-gpio -v || sudo apt-get install gpio
 	gpio -g mode 11 up
 	${MAKE} run/${@F} run_args="${@D}"
 
-
 play-phat/%: ${main_src} /sys/class/gpio/export
 	-lsmod | grep gpio_keys \
  && ${sudo} modprobe -rv gpio_keys \
  || echo "log: will use /sys/class/gpio/"
 	${MAKE} run/${@F} run_args="${@D}"
+
+traffic-phat/%: ${main_src} /sys/class/gpio/export
+	list="13 19 26" ; \
+	for num in $list ; do \
+ sudo gpio export $num in \
+ sudo gpio -g mode $num up \
+ sudo gpio unexport $num \
+done
+	${MAKE} run/${@F} run_args="${@D}"
+
