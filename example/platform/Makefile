@@ -9,6 +9,8 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.*
 #}
 
+default: check
+
 main_src ?= index.js
 lib_srcs ?= $(wildcard */*.js | sort)
 runtime ?= node
@@ -16,12 +18,19 @@ topreldir ?= ../..
 topdir ?= ${CURDIR}/${topreldir}
 run_args ?= start
 sudo ?= sudo
+tmp_dir ?= tmp
+done_dir ?= ${tmp_dir}/done
 SHELL := NODE_PATH=${topreldir} ${SHELL}
-
-default: check
 
 %: %/${runtime}
 	echo "# $@: $^"
+
+${done_dir}/%: %
+	mkdir -p ${@}
+	touch $@
+
+setup/node: ${topreldir}/node_modules node_modules
+	echo "$@: $^"
 
 run/%: ${main_src} /sys/class/gpio/export
 	ls $<
@@ -33,7 +42,7 @@ run/node: ${main_src} package.json /sys/class/gpio/export
 	ls -l ${topreldir}/node_modules || { cd ${topreldir} && npm install ; }
 	npm run ${run_args}
 
-board/%: ${main_src} board/%.js /sys/class/gpio/export
+board/%: ${main_src} board/%.js /sys/class/gpio/export ${done_dir}/setup/${runtime}
 	${runtime} $< ${@F}
 
 run: run/${runtime}
@@ -55,7 +64,6 @@ package.json:
 ${topreldir}/node_modules: ${topreldir}/package.json
 	cd ${@D} && npm install
 
-node/setup: ${topreldir}/node_modules node_modules
 
 check/%: ${lib_srcs}
 	status=0 ; \
