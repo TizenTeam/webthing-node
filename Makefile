@@ -15,6 +15,10 @@ tmp_dir ?= tmp
 runtime ?= iotjs
 export runtime
 eslint ?= node_modules/eslint/bin/eslint.js
+babel ?= ./node_modules/.bin/babel
+babelrc ?= ${CURDIR}/extra/${runtime}/.babelrc
+babel_stamp_file += docs/babel.txt
+
 srcs ?= $(wildcard *.js lib/*.js | sort | uniq)
 run_args ?=
 run_timeout ?= 10
@@ -126,5 +130,68 @@ setup/iotjs:
  || echo "log: Should have printed iotjs's usage..."
 	-which iotjs
 
-build/iotjs: setup
+build/iotjs: setup ${babel_stamp_file}
 	echo "log: $@: $^"
+
+babel: ${babelrc} ${babel}
+	${babel} \
+ --no-babelrc \
+ --config-file "$<" \
+ --delete-dir-on-start \
+ --ignore 'node_modules/**,dist/**' \
+ -d "${CURDIR}/tmp/dist/${runtime}/" \
+ --verbose \
+ .
+	rsync -avx tmp/dist/${runtime}/ ./
+	@rm -rf tmp/dist/${runtime}/
+
+${babelrc}:
+	ls $@ || echo '{ "ignore": [ "node_modules/**.js" ] }' > $@
+	cat $@
+
+babel/runtime/%:
+	-git commit -am "WIP: babel: About to transpile for ${@F}"
+	${MAKE} babel runtime=${@F}
+	-git commit -am "${runtime}: Transpiled using babel"
+
+babel/runtimes:
+	${MAKE} babel/runtime/node
+	${MAKE} babel/runtime/iotjs
+
+babel/setup: Makefile
+	ls node_modules || ${MAKE} node_modules
+	-git commit -am "WIP: babel: About to setup"
+	npm install @babel/cli
+	npm install @babel/core
+	npm install @babel/plugin-transform-arrow-functions
+	npm install @babel/plugin-transform-block-scoping
+	npm install @babel/plugin-transform-template-literals
+	@echo "TODO: npm install @babel/plugin-transform-for-of"
+	@echo "TODO: npm install @babel/plugin-transform-classes"
+	npm install @babel/preset-env
+	-git commit -am "WIP: babel: Installed tools"
+
+${babel}:
+	ls $@ || ${MAKE} babel/setup
+
+docs/babel.txt:
+	ls $@ && exit 0 || echo "log: Assuming it is not transpiled yet"
+	${MAKE} babel/build
+	${babel} --version > $@
+	${babel} --help >> $@
+	-git add "$@"
+	-git commit -m "${runtime}: Add babel's doc file as build stamp" "$@"
+
+babel/revert:
+	@echo "TODO: move $@ patch and iotjs port at end of list"
+	-git commit -am "WIP: babel: About to $@"
+	git rebase -i remotes/upstream/master
+	git revert HEAD
+	git revert HEAD~2
+	git revert HEAD~4
+
+babel/build: eslint babel/runtime/node babel/runtime/${runtime}
+
+babel/devel: babel/revert eslint
+	${MAKE} babel/build
+	git rebase -i remotes/upstream/master
