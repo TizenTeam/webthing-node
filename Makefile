@@ -1,4 +1,4 @@
-#!/bin/make -f
+#!/usr/bin/make -f
 # -*- makefile -*-
 # SPDX-License-Identifier: MPL-2.0
 #{
