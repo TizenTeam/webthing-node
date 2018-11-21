@@ -19,7 +19,7 @@ srcs ?= $(wildcard *.js lib/*.js | sort | uniq)
 run_args ?=
 run_timeout ?= 10
 
-main_src ?= example/multiple-things.js
+main_src ?= example/iotivity-sensor.js
 NODE_PATH := .:${NODE_PATH}
 export NODE_PATH
 
@@ -59,6 +59,20 @@ run/npm: ${main_src} setup
 
 run: run/${runtime}
 
+start:
+	-killall server client
+	which unbuffer || sudo apt-get install -y expect
+	unbuffer make -C ~/mnt/iotivity-example run/server  2> /dev/null \
+ | stdbuf -o 0 grep -v ':' \
+ | stdbuf -oL -eL sed -n -e 's|^\([0,1]\)|\1|p' \
+ | make -C ~/mnt/webthing-node run
+
+#| stdbuf -oL -eL node main.js
+
+#	unbuffer | stdbuf -o 0 grep -e '{0,1}'
+# -C ~/mnt/webthing-node run
+#	unbuffer make -C ~/mnt/iotivity-example run/server | stdbuf -o 0 grep -e '{0,1}'
+
 clean:
 	rm -rf ${tmp_dir}
 
@@ -85,8 +99,6 @@ test/npm: package.json
 	npm test
 
 test: test/${runtime}
-
-start: run
 
 start/board/%: example/platform/Makefile example/platform/board/%.js
 	${MAKE} -C ${<D} board/${@F}
