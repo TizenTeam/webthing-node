@@ -14,7 +14,9 @@ const {
   Thing,
 } = require('webthing');
 
+const GpioProperty = require('../gpio/gpio-property');
 const PwmProperty = require('../pwm/pwm-property');
+
 
 class EdisonThing extends Thing {
   constructor(name, type, description) {
@@ -23,6 +25,10 @@ class EdisonThing extends Thing {
           description || 'A web connected Edison');
     const self = this;
     this.pinProperties = [
+      new GpioProperty(this, 'GPIO45',
+                       false,
+                       {description: 'GPIO45 (J20-4 on breakout board)'},
+                       {direction: 'out', pin: 45}),
       new PwmProperty(this, 'PWM0', 50, {
         description: 'Analog port of Edison',
       }),
