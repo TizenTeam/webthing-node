@@ -20,8 +20,7 @@ const PwmProperty = require('../pwm/pwm-property');
 
 class ARTIK1020Thing extends Thing {
   constructor(name, type, description) {
-    super('urn:dev:ops:my-artik1020-1234',
-          name || 'ARTIK1020',
+    super(name || 'ARTIK1020',
           type || [],
           description || 'A web connected ARTIK1020');
     const self = this;
