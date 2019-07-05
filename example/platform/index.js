@@ -21,7 +21,7 @@ const {
 } = require('webthing');
 
 // Update with different board here if needed
-let board = 'artik530';
+let board = 'default';
 if (process.argv.length > 2) {
   board = String(process.argv[2]);
 }
