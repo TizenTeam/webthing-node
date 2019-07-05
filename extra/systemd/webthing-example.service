@@ -3,7 +3,7 @@ Description=webthing-example
 After=network.target
 
 [Service]
-ExecStart=/usr/share/local/src/webthing-node/webthing-example.sh
+ExecStart=/usr/local/opt/webthing-node/extra/systemd/webthing-example.sh
 Restart=always
 
 [Install]
